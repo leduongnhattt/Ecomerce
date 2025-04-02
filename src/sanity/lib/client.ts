@@ -1,3 +1,4 @@
+
 import { createClient } from 'next-sanity'
 
 import { apiVersion, dataset, projectId } from '../env'
@@ -30,4 +31,19 @@ export const getProductsByCategorySlug = async (slug: string) => {
   const query = `*[_type == "product" && references(*[_type == "productCategory" && slug.current == $slug][0]._id)]`
   const products = await sanityFetch({ query: query, params: { slug } });
   return products.data as Product[];
+}
+export const searchProducts = async (searchQuery: string) => {
+  const query = `*[_type == "product" && (
+    title match "*" + $searchQuery + "*" ||
+    description match "*" + $searchQuery + "*" ||
+    category->title match "*" + $searchQuery + "*" ||
+    category->slug.current match "*" + $searchQuery + "*"
+  )]`;
+  const products = await sanityFetch({ query: query, params: { searchQuery } })
+  return products.data as Product[]
+}
+export const getProductById = async (id: string) => {
+  const query = `*[_type == "product" && _id == $id][0]`
+  const product = await sanityFetch({ query: query, params: { id } })
+  return product.data as Product
 }
