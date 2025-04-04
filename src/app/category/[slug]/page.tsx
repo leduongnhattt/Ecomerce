@@ -33,25 +33,6 @@ export default async function CategoryPage({ params }: CategoryProps) {
         </div>
       </div>
 
-      <div className="bg-yellow-50 py-3">
-        <div className="container mx-auto">
-          <div className="flex items-center justify-center gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <span className="text-yellow-600">🚚</span>
-              <span>Free Shipping</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-yellow-600">⭐️</span>
-              <span>Top Rated</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-yellow-600">💰</span>
-              <span>Best Prices</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <section className="container mx-auto py-8">
         <div className="text-center mb-8">
           <p className="text-sm text-gray-500">

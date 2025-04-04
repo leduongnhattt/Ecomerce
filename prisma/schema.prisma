@@ -10,7 +10,7 @@ generator client {
 
 datasource db {
   provider  = "postgresql"
-  url  	    = env("DATABASE_URL")
+  url  	    = env("DATABASE_URL") 
 }
 
 model User {
@@ -18,10 +18,27 @@ model User {
  email String @unique
  passwordHash String
  sessions Session[]
+ cart Cart?
 }
 model Session {
   id String @id
   userId Int
   expiresAt DateTime
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+model CartLineItem {
+  id String @id
+  sanityProductId String
+  quantity Int
+  title String
+  price Float
+  image String
+  cartId String
+  cart Cart @relation(references: [id], fields: [cartId], onDelete: Cascade)
+}
+model Cart {
+  id String @id
+  userId Int? @unique
+  user User? @relation(references: [id], fields: [userId], onDelete: Cascade)
+  items CartLineItem[]
 }
