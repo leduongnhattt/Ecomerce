@@ -3,11 +3,15 @@ import { promotionCode } from './schemas/promotion-codes'
 import { promotionCampaign } from './schemas/promotion-campaign'
 import { product } from './schemas/product'
 import { productCategory } from './schemas/product-category'
+import { order, orderItem, shippingAdress } from './schemas/order'
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
     promotionCode,
     promotionCampaign,
+    orderItem,
+    order,
+    shippingAdress,
     product,
     productCategory,
   ],

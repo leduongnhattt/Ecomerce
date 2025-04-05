@@ -68,6 +68,47 @@ export type Geopoint = {
   alt?: number;
 };
 
+export type Order = {
+  _id: string;
+  _type: "order";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  orderNumber?: string;
+  orderDate?: string;
+  customerEmail?: string;
+  stripeCustomerId?: string;
+  stripePaymentIntentId?: string;
+  shippingAddress?: ShippingAdress;
+  totalPrice?: number;
+  orderItems?: Array<{
+    _key: string;
+  } & OrderItem>;
+  status?: "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
+};
+
+export type ShippingAdress = {
+  _type: "shippingAdress";
+  name?: string;
+  line1?: string;
+  line2?: string;
+  city?: string;
+  postalCode?: string;
+  country?: string;
+};
+
+export type OrderItem = {
+  _type: "orderItem";
+  product?: {
+    _ref: string;
+    _type: "reference";
+    _weak?: boolean;
+    [internalGroqTypeReferenceTo]?: "product";
+  };
+  quantity?: number;
+  price?: number;
+};
+
 export type Product = {
   _id: string;
   _type: "product";
@@ -197,5 +238,5 @@ export type PromotionCode = {
   expirationDate?: string;
 };
 
-export type AllSanitySchemaTypes = SanityImagePaletteSwatch | SanityImagePalette | SanityImageDimensions | SanityFileAsset | Geopoint | Product | ProductCategory | Slug | SanityImageCrop | SanityImageHotspot | SanityImageAsset | SanityAssetSourceData | SanityImageMetadata | PromotionCampaign | PromotionCode;
+export type AllSanitySchemaTypes = SanityImagePaletteSwatch | SanityImagePalette | SanityImageDimensions | SanityFileAsset | Geopoint | Order | ShippingAdress | OrderItem | Product | ProductCategory | Slug | SanityImageCrop | SanityImageHotspot | SanityImageAsset | SanityAssetSourceData | SanityImageMetadata | PromotionCampaign | PromotionCode;
 export declare const internalGroqTypeReferenceTo: unique symbol;
