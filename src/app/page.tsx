@@ -7,6 +7,8 @@ export default async function Home() {
   //const { user } = await getCurrentSession();
 
   const products = await getAllProducts();
+  console.log("🧪 Dataset:", process.env.NEXT_PUBLIC_SANITY_DATASET);
+
   return (
     <div>
       <SalesCampaignBanner />
