@@ -18,6 +18,7 @@ type CartStore = {
     setStore: (store: Partial<CartStore>) => void;
     addItem: (item: CartItem) => Promise<void>;
     removeItem: (id: string) => Promise<void>;
+    removeAll: () => Promise<void>;
     updateQuantity: (id: string, quantity: number) => Promise<void>;
     clearCart: () => void;
     open: () => void;
@@ -66,17 +67,19 @@ export const useCartStore = create<CartStore>()(
                 const { cartId } = await get();
                 if (!cartId) return;
 
-                const updateCart = await updateCartItem(cartId, id, {
+                const updatedCart = await updateCartItem(cartId, id, {
                     quantity: 0
                 })
                 set((state) => {
                     return {
                         ...state,
-                        cartId: updateCart.id,
-                        items: state.items.filter((item) => item.id != id)
+                        cartId: updatedCart.id,
+                        items: state.items.filter((item) => item.id !== id)
                     }
                 })
-
+            },
+            removeAll: async () => {
+                set((state) => ({ ...state, items: [] }))
             },
             updateQuantity: async (id, quantity) => {
                 const { cartId } = await get();
@@ -111,9 +114,9 @@ export const useCartStore = create<CartStore>()(
                     const cart = await getOrCreateCart(cartId);
                     set((state) => ({ ...state, cartId: cart.id, items: cart.items }))
                 }
-                const syncedCardt = await syncCartWithUser(cartId);
-                if (syncedCardt) {
-                    set((state) => ({ ...state, cartId: syncedCardt.id, items: syncedCardt.items }))
+                const syncedCart = await syncCartWithUser(cartId);
+                if (syncedCart) {
+                    set((state) => ({ ...state, cartId: syncedCart.id, items: syncedCart.items }))
                 }
 
             },

@@ -1,16 +1,17 @@
 import { redirect } from "next/navigation";
-import React from "react";
 import Stripe from "stripe";
-const getCheckoutSession = async (sessionId: string) => {
+
+export const getCheckoutSession = async (sessionId: string) => {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
   return stripe.checkout.sessions.retrieve(sessionId);
 };
-export default async function CheckoutSuccessPage({
+
+const CheckoutSuccessPage = async ({
   searchParams,
 }: {
   searchParams: Promise<{ session_id: string }>;
-}) {
+}) => {
   const { session_id } = await searchParams;
 
   if (!session_id) {
@@ -22,7 +23,6 @@ export default async function CheckoutSuccessPage({
   if (!session) {
     redirect("/");
   }
-
   return (
     <div className="min-h-[60vh] flex items-center justify-center">
       <div className="max-w-md w-full mx-auto p-6">
@@ -63,4 +63,6 @@ export default async function CheckoutSuccessPage({
       </div>
     </div>
   );
-}
+};
+
+export default CheckoutSuccessPage;

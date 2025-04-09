@@ -1,13 +1,84 @@
 "use client";
-import { useCartStore } from "@/stores/card-store";
+import {
+  useCartStore,
+  type CartItem as CartItemType,
+} from "@/stores/card-store";
 import { Loader2, ShoppingCart, X } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useShallow } from "zustand/shallow";
 import { formatPrice } from "@/lib/utils";
+import prisma from "@/lib/prisma";
 import { createCheckoutSession } from "@/actions/stripe-actions";
+
 const freeShippingAmount = 15;
+
+const CartItem = ({ item }: { item: CartItemType }) => {
+  const { removeItem, updateQuantity } = useCartStore(
+    useShallow((state) => ({
+      removeItem: state.removeItem,
+      updateQuantity: state.updateQuantity,
+    }))
+  );
+  const isFreeItem = item.price === 0;
+
+  return (
+    <div
+      key={`cart-item-${item.id}`}
+      className="flex gap-4 p-4 hover:bg-gray-50"
+    >
+      <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 border">
+        <Image
+          src={item.image}
+          alt={item.title}
+          fill
+          className="object-cover"
+        />
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <h3 className="font-medium text-gray-900 truncate">{item.title}</h3>
+        <div className="text-sm text-gray-500 mt-1">
+          {isFreeItem ? (
+            <span className="text-emerald-600 font-medium">FREE</span>
+          ) : (
+            formatPrice(item.price)
+          )}
+        </div>
+        <div className="flex items-center gap-3 mt-2">
+          {isFreeItem ? (
+            <div className="text-sm text-emerald-600 font-medium">
+              Prize Item
+            </div>
+          ) : (
+            <>
+              <select
+                value={item.quantity}
+                onChange={(e) =>
+                  updateQuantity(item.id, Number(e.target.value))
+                }
+                className="border rounded-md px-2 py-1 text-sm bg-white"
+              >
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                  <option key={`cart-qty-slct-${item.id}-${num}`} value={num}>
+                    {num}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={() => removeItem(item.id)}
+                className="text-red-500 text-sm hover:text-red-600"
+              >
+                Remove
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 export default function Cart() {
   const {
     cartId,
@@ -15,11 +86,9 @@ export default function Cart() {
     close,
     isOpen,
     syncWithUser,
-    removeItem,
     setLoaded,
     getTotalItems,
     getTotalPrice,
-    updateQuantity,
   } = useCartStore(
     useShallow((state) => ({
       cartId: state.cartId,
@@ -43,17 +112,27 @@ export default function Cart() {
     };
     initCart();
   }, []);
+
   const totalPrice = getTotalPrice();
+
   const remaingForFreeShipping = useMemo(() => {
     return Math.max(0, freeShippingAmount - totalPrice);
   }, [totalPrice]);
   const [loadingProceed, setLoadingProceed] = useState<boolean>(false);
 
   const handleProceedToCheckout = async () => {
-    if (!cartId) return null;
+    console.log("item", items);
+    if (!cartId || loadingProceed) return;
+    setLoadingProceed(true);
     const checkoutUrl = await createCheckoutSession(cartId);
-
     window.location.href = checkoutUrl;
+    for (const item of items) {
+      await prisma.cart.delete({
+        where: {
+          id: item.id,
+        },
+      });
+    }
     setLoadingProceed(false);
   };
   return (
@@ -110,51 +189,7 @@ export default function Cart() {
             ) : (
               <div className="divide-y">
                 {items.map((item) => (
-                  <div
-                    key={`cart-item-${item.id}`}
-                    className="flex gap-4 p-4 hover:bg-gray-50"
-                  >
-                    <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 border">
-                      <Image
-                        src={item.image}
-                        alt={item.title}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-gray-900 truncate">
-                        {item.title}
-                      </h3>
-                      <div className="text-sm text-gray-500 mt-1">
-                        {formatPrice(item.price)}
-                      </div>
-                      <div className="flex items-center gap-3 mt-2">
-                        <select
-                          value={item.quantity}
-                          onChange={(e) =>
-                            updateQuantity(item.id, Number(e.target.value))
-                          }
-                          className="border rounded-md px-2 py-1 text-sm bg-white"
-                        >
-                          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-                            <option
-                              key={`cart-qty-slct-${item.id}-${num}`}
-                              value={num}
-                            >
-                              {num}
-                            </option>
-                          ))}
-                        </select>
-                        <button
-                          className="text-red-500 text-sm hover:text-red-600"
-                          onClick={() => removeItem(item.id)}
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                  <CartItem key={`cart-item-` + item.id} item={item} />
                 ))}
               </div>
             )}

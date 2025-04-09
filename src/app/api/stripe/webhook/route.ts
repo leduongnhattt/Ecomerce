@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { umamiTrackCheckoutSuccessEvent } from "@/lib/umani";
 import { createClient } from "next-sanity";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
@@ -9,7 +10,6 @@ export async function POST(req: Request) {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
-    console.log("🔐 Stripe key:", process.env.STRIPE_SECRET_KEY);
 
     // Get sanity client
     const sanityClient = createClient({
@@ -63,7 +63,7 @@ export async function POST(req: Request) {
                         };
                     };
                 };
-
+                ;
 
                 const cartId = session.metadata?.cartId;
                 const userId = session.metadata?.userId;
@@ -154,9 +154,4 @@ export async function POST(req: Request) {
             { status: 500 },
         )
     }
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function umamiTrackCheckoutSuccessEvent(_arg0: { cartId: string; email: string; orderId: string; orderTotal: number; orderCurrency: string; }) {
-    throw new Error("Function not implemented.");
 }
