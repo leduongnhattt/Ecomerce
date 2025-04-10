@@ -125,6 +125,21 @@ export default function Cart() {
     if (!cartId || loadingProceed) return;
     setLoadingProceed(true);
     const checkoutUrl = await createCheckoutSession(cartId);
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const anyWindow = window as any;
+
+      if (anyWindow.umami) {
+        anyWindow.umami.track("proceed_to_checkout", {
+          cartId: cartId,
+          totalPrice: getTotalPrice(),
+          currency: "USD",
+        });
+      }
+    } catch (e) {
+      console.log(e);
+    }
+
     window.location.href = checkoutUrl;
     for (const item of items) {
       await prisma.cart.delete({

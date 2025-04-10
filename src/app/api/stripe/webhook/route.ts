@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { umamiTrackCheckoutSuccessEvent } from "@/lib/umani";
+import { umamiTrackCheckoutSuccessEvent } from "@/lib/umami";
 import { createClient } from "next-sanity";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";

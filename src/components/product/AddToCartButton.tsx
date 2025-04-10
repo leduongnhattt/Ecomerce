@@ -10,8 +10,9 @@ type AddToCartButtonProps = {
   product: Product;
 };
 export default function AddToCartButton({ product }: AddToCartButtonProps) {
-  const { addItem, open } = useCartStore(
+  const { cartId, addItem, open } = useCartStore(
     useShallow((state) => ({
+      cartId: state.cartId,
       addItem: state.addItem,
       open: state.open,
     }))
@@ -30,6 +31,22 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
       image: urlFor(product.image).url(),
       quantity: 1,
     });
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const anyWindow = window as any;
+
+      if (anyWindow.umami) {
+        anyWindow.umami.track("proceed_to_checkout", {
+          cartId: cartId,
+          productId: product._id,
+          productName: product.title,
+          price: product.price,
+          currency: "USD",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+    }
     setLoading(false);
     open();
   };
